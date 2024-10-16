@@ -1,6 +1,5 @@
 package com.automation;
 
-
 import io.qameta.allure.*;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -18,53 +17,52 @@ import static org.testng.AssertJUnit.assertTrue;
 public class SeleniumTest extends BaseTest {
     public String productName = "";
 
-
     @Test
     @Severity(SeverityLevel.CRITICAL)
     @Description("DemoBlaze Testing")
     @Feature("Add Product to Cart")
     public void testAddToCart() throws InterruptedException {
-        openLaptopCategory();
-        navigateToFirstLaptop();
-        addToCart();
-        closeAlert();
-        openCartPage();
-        verifyAddedLaptop();
+        accessLaptopCategory();
+        goToFirstLaptop();
+        addProductToCart();
+        dismissAlert();
+        navigateToCartPage();
+        checkLaptopAdded();
     }
 
-    @Step("Open Laptop Category")
-    public void openLaptopCategory() throws InterruptedException {
-        waitUntilPageIsFullyLoaded();
+    @Step("Access Laptop Category")
+    public void accessLaptopCategory() throws InterruptedException {
+        ensurePageIsFullyLoaded();
 
-        By by = By.xpath("//a[text()=\"Laptops\"]");
-        WebElement element = waitUntilElementIsClickable(by);
-        element.click();
+        By locator = By.xpath("//a[text()=\"Laptops\"]");
+        WebElement clickableElement = waitForElementToBeClickable(locator);
+        clickableElement.click();
         Thread.sleep(3000);
     }
 
-    @Step("Navigate to first laptop")
-    public void navigateToFirstLaptop() {
+    @Step("Go to First Laptop")
+    public void goToFirstLaptop() {
         getDriver().findElement(By.xpath("//div[@id=\"tbodyid\"][1]/div[1]//a")).click();
     }
 
-    @Step("Add product to chart")
-    public void addToCart() {
-        String url = getDriver().getCurrentUrl();
-        assertTrue("url is incorrect", url.contains("prod.html"));
+    @Step("Add Product to Cart")
+    public void addProductToCart() {
+        String currentUrl = getDriver().getCurrentUrl();
+        assertTrue("The URL is not correct", currentUrl.contains("prod.html"));
 
-        waitUntilPageIsFullyLoaded();
+        ensurePageIsFullyLoaded();
 
-        By by = By.xpath("//a[text()=\"Add to cart\"]");
-        WebElement element = waitUntilElementIsClickable(by);
+        By locator = By.xpath("//a[text()=\"Add to cart\"]");
+        WebElement clickableElement = waitForElementToBeClickable(locator);
 
         productName = getDriver().findElement(By.xpath("//h2[@class=\"name\"]")).getText();
-        element.click();
+        clickableElement.click();
     }
 
-    @Step("Close Alert")
-    public void closeAlert() throws InterruptedException {
-        int i = 0;
-        while (i++ < 5) {
+    @Step("Dismiss Alert")
+    public void dismissAlert() throws InterruptedException {
+        int attempts = 0;
+        while (attempts++ < 5) {
             try {
                 getDriver().switchTo().alert().accept();
                 break;
@@ -74,41 +72,41 @@ public class SeleniumTest extends BaseTest {
         }
     }
 
-    @Step("Open Cart Page")
-    public void openCartPage() {
+    @Step("Navigate to Cart Page")
+    public void navigateToCartPage() {
         getDriver().findElement(By.xpath("//a[text()=\"Cart\"]")).click();
     }
 
-    @Step("Verify Laptop is Added Correctly")
-    public void verifyAddedLaptop() {
-        waitUntilPageIsFullyLoaded();
+    @Step("Check Laptop Added Correctly")
+    public void checkLaptopAdded() {
+        ensurePageIsFullyLoaded();
 
-        By by = By.xpath("//tbody/tr");
-        waitUntilElementIsVisible(by);
-        List<WebElement> productNames = getDriver().findElements(By.xpath("//tbody//tr[1]/td[2]"));
+        By locator = By.xpath("//tbody/tr");
+        waitForElementToBeVisible(locator);
+        List<WebElement> productRows = getDriver().findElements(By.xpath("//tbody//tr[1]/td[2]"));
 
-        boolean productPresent = false;
-        for (WebElement productRowName : productNames) {
-            if (productRowName.getText().equals(productName)) {
-                productPresent = true;
+        boolean isProductFound = false;
+        for (WebElement productRow : productRows) {
+            if (productRow.getText().equals(productName)) {
+                isProductFound = true;
             }
         }
 
-        assertTrue("product isn't found in cart", productPresent);
+        assertTrue("The product was not found in the cart", isProductFound);
     }
 
-    public void waitUntilPageIsFullyLoaded() {
+    public void ensurePageIsFullyLoaded() {
         new WebDriverWait(getDriver(), Duration.ofSeconds(10)).until(
                 webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
     }
 
-    public WebElement waitUntilElementIsClickable(By by) {
-        WebDriverWait w = new WebDriverWait(getDriver(), Duration.ofSeconds(10L));
-        return w.until(ExpectedConditions.elementToBeClickable(by));
+    public WebElement waitForElementToBeClickable(By locator) {
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(10L));
+        return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
-    public void waitUntilElementIsVisible(By by) {
-        WebDriverWait w = new WebDriverWait(getDriver(), Duration.ofSeconds(10L));
-        w.until(ExpectedConditions.visibilityOfElementLocated(by));
+    public void waitForElementToBeVisible(By locator) {
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(10L));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 }
